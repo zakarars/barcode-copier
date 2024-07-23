@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Copier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .column {
+            margin: 0 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            min-width: 200px;
+        }
+        .barcode {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: none;
+            margin: 5px 0;
+            display: block;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .barcode:hover {
+            background-color: #f1f1f1;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #copiedList h2 {
+            margin-top: 0;
+        }
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        let copiedItems = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCopiedItems();
+        });
+
+        function copyToClipboard(text, element) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            // Move the copied item to the right column
+            const copiedList = document.getElementById('copiedList');
+            const newItem = document.createElement('div');
+            newItem.textContent = element.textContent;
+            newItem.className = 'barcode';
+            copiedList.appendChild(newItem);
+
+            // Remove the copied item from the left column
+            element.style.display = 'none';
+            copiedItems.push({ text, elementText: element.textContent });
+            saveCopiedItems();
+
+            // Show notification
+            showNotification('Copied: ' + text);
+        }
+
+        function undoLastCopy() {
+            if (copiedItems.length > 0) {
+                const lastCopiedItem = copiedItems.pop();
+                const element = [...document.querySelectorAll('#barcodeList .barcode')].find(el => el.textContent === lastCopiedItem.elementText);
+                if (element) {
+                    element.style.display = 'block';
+                }
+                const copiedList = document.getElementById('copiedList');
+                const items = copiedList.getElementsByClassName('barcode');
+                if (items.length > 0) {
+                    copiedList.removeChild(items[items.length - 1]);
+                }
+                saveCopiedItems();
+            }
+        }
+
+        function resetAll() {
+            copiedItems = [];
+            saveCopiedItems();
+            document.getElementById('copiedList').innerHTML = '<h2>Copied Barcodes</h2>';
+            document.querySelectorAll('#barcodeList .barcode').forEach(el => {
+                el.style.display = 'block';
+            });
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.opacity = 1;
+            setTimeout(() => {
+                notification.style.opacity = 0;
+            }, 2000);
+        }
+
+        function saveCopiedItems() {
+            localStorage.setItem('copiedItems', JSON.stringify(copiedItems));
+        }
+
+        function loadCopiedItems() {
+            const savedItems = localStorage.getItem('copiedItems');
+            if (savedItems) {
+                copiedItems = JSON.parse(savedItems);
+                copiedItems.forEach(item => {
+                    const copiedList = document.getElementById('copiedList');
+                    const newItem = document.createElement('div');
+                    newItem.textContent = item.elementText;
+                    newItem.className = 'barcode';
+                    copiedList.appendChild(newItem);
+
+                    const element = [...document.querySelectorAll('#barcodeList .barcode')].find(el => el.textContent === item.elementText);
+                    if (element) {
+                        element.style.display = 'none';
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>Click to Copy Barcodes</h1>
+    <div class="button-container">
+   <button onclick="undoLastCopy()">Undo Last Copy</button>
+        <button onclick="resetAll()">Reset All</button>
+    </div>
+    <div class="container">
+        <div id="barcodeList" class="column">
+     <!--  <div class="barcode" onclick="copyToClipboard('8594011502070', this)">Krystal Kitchen - 8594011502070</div>
+            <div class="barcode" onclick="copyToClipboard('8594011502100', this)">Krystal Bathroom - 8594011502100</div>  
+            
+            <div class="barcode" onclick="copyToClipboard('4010355055774', this)">Denkmit čistič na trouby - 4010355055774</div>  -->  
+            <div class="barcode" onclick="copyToClipboard('4023103185975', this)">Vileda microfibre colors - 4023103185975</div>
+            <div class="barcode" onclick="copyToClipboard('5201314578031', this)">FINO pytle na odpadky hd color s uchy 60l x20ks - 5201314578031</div>
+            <div class="barcode" onclick="copyToClipboard('5201314914013', this)">FINO úklidové rukavice - m - 5201314914013</div>
+            <div class="barcode" onclick="copyToClipboard('5201314413943', this)">Fino pytle na odpadky hd color s uchy 10l x50ks - 5201314413943</div>
+            <div class="barcode" onclick="copyToClipboard('9001378501947', this)">Soke náhrada na mop plochý - 59001378501947</div>
+            <div class="barcode" onclick="copyToClipboard('9001378837923', this)">Soke houbičky na nádobí x5ks tvarované - 59001378837923</div>
+            <!--<div class="barcode" onclick="copyToClipboard('9001378501954', this)">Soke mop Economic - 59001378501954</div>
+            <div class="barcode" onclick="copyToClipboard('8584014020800', this)">Harmony Family Everyday 2vrstvé papírové útěrky 44 m, 1 role - 8584014020800</div>-->   
+            
+            <div class="barcode" onclick="copyToClipboard('8584014007306', this)">HARMONY KUCHYŇSKÉ UTĚRKY EVERYDAY FAMILY PACK 4KS - 8584014007306</div>
+           <!-- <div class="barcode" onclick="copyToClipboard('8594011503473', this)">Eco Logical Wc cleaner - 8594011503473</div> -->
+        </div>
+        <div id="copiedList" class="column">
+            <h2>Copied Barcodes</h2>
+        </div>
+    </div>
+    <div id="notification"></div>
+</body>
+</html>
