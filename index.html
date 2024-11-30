@@ -81,10 +81,63 @@
     </style>
     <script>
         let copiedItems = [];
+        let barcodeItems = [
+            { id: '4023103185975', description: 'Vileda microfibre colors' },
+            { id: '5201314578031', description: 'FINO pytle na odpadky hd color s uchy 60l x20ks' },
+            { id: '5201314914013', description: 'FINO úklidové rukavice - m' },
+            { id: '5201314413943', description: 'Fino pytle na odpadky hd color s uchy 10l x50ks' },
+            { id: '9001378501947', description: 'Soke náhrada na mop plochý' },
+            { id: '9001378837923', description: 'Soke houbičky na nádobí x5ks tvarované' },
+            { id: '8584014007306', description: 'HARMONY KUCHYŇSKÉ UTĚRKY EVERYDAY FAMILY PACK 4KS' },
+        ];
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadBarcodes();
             loadCopiedItems();
         });
+
+        function addOrUpdateBarcode() {
+            const barcodeId = document.getElementById('barcodeId').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!barcodeId || !description) {
+                alert('Please fill in both fields.');
+                return;
+            }
+
+            const existingItem = barcodeItems.find(item => item.id === barcodeId);
+            if (existingItem) {
+                existingItem.description = description;
+            } else {
+                barcodeItems.push({ id: barcodeId, description });
+            }
+
+            saveBarcodes();
+            loadBarcodes();
+        }
+
+        function deleteBarcode() {
+            const barcodeId = document.getElementById('barcodeId').value.trim();
+            barcodeItems = barcodeItems.filter(item => item.id !== barcodeId);
+            saveBarcodes();
+            loadBarcodes();
+        }
+
+        function loadBarcodes() {
+            const barcodeList = document.getElementById('barcodeList');
+            barcodeList.innerHTML = '';
+            barcodeItems.forEach(item => {
+                const barcodeElement = document.createElement('div');
+                barcodeElement.textContent = `${item.description} - ${item.id}`;
+                barcodeElement.className = 'barcode';
+                barcodeElement.onclick = () => copyToClipboard(item.id, barcodeElement);
+                barcodeList.appendChild(barcodeElement);
+            });
+        }
+
+        function saveBarcodes() {
+            localStorage.setItem('barcodeItems', JSON.stringify(barcodeItems));
+        }
 
         function copyToClipboard(text, element) {
             const tempInput = document.createElement('input');
@@ -169,29 +222,19 @@
     </script>
 </head>
 <body>
-<h1>Click to Copy Barcodes</h1>
+    <h1>Click to Copy Barcodes</h1>
     <div class="button-container">
-   <button onclick="undoLastCopy()">Undo Last Copy</button>
+        <button onclick="undoLastCopy()">Undo Last Copy</button>
         <button onclick="resetAll()">Reset All</button>
     </div>
+    <div>
+        <input type="text" id="barcodeId" placeholder="Barcode ID">
+        <input type="text" id="description" placeholder="Description">
+        <button onclick="addOrUpdateBarcode()">Add/Update Barcode</button>
+        <button onclick="deleteBarcode()">Delete Barcode</button>
+    </div>
     <div class="container">
-        <div id="barcodeList" class="column">
-     <!--  <div class="barcode" onclick="copyToClipboard('8594011502070', this)">Krystal Kitchen - 8594011502070</div>
-            <div class="barcode" onclick="copyToClipboard('8594011502100', this)">Krystal Bathroom - 8594011502100</div>  
-            
-            <div class="barcode" onclick="copyToClipboard('4010355055774', this)">Denkmit čistič na trouby - 4010355055774</div>  -->  
-            <div class="barcode" onclick="copyToClipboard('4023103185975', this)">Vileda microfibre colors - 4023103185975</div>
-            <div class="barcode" onclick="copyToClipboard('5201314578031', this)">FINO pytle na odpadky hd color s uchy 60l x20ks - 5201314578031</div>
-            <div class="barcode" onclick="copyToClipboard('5201314914013', this)">FINO úklidové rukavice - m - 5201314914013</div>
-            <div class="barcode" onclick="copyToClipboard('5201314413943', this)">Fino pytle na odpadky hd color s uchy 10l x50ks - 5201314413943</div>
-            <div class="barcode" onclick="copyToClipboard('9001378501947', this)">Soke náhrada na mop plochý - 59001378501947</div>
-            <div class="barcode" onclick="copyToClipboard('9001378837923', this)">Soke houbičky na nádobí x5ks tvarované - 59001378837923</div>
-            <!--<div class="barcode" onclick="copyToClipboard('9001378501954', this)">Soke mop Economic - 59001378501954</div>
-            <div class="barcode" onclick="copyToClipboard('8584014020800', this)">Harmony Family Everyday 2vrstvé papírové útěrky 44 m, 1 role - 8584014020800</div>-->   
-            
-            <div class="barcode" onclick="copyToClipboard('8584014007306', this)">HARMONY KUCHYŇSKÉ UTĚRKY EVERYDAY FAMILY PACK 4KS - 8584014007306</div>
-           <!-- <div class="barcode" onclick="copyToClipboard('8594011503473', this)">Eco Logical Wc cleaner - 8594011503473</div> -->
-        </div>
+        <div id="barcodeList" class="column"></div>
         <div id="copiedList" class="column">
             <h2>Copied Barcodes</h2>
         </div>
